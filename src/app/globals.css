@@ -1,0 +1,87 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: #F7F5F0;
+    --surface: #FFFFFF;
+    --surface-warm: #FAF8F5;
+    --surface-muted: #EFECE4;
+    --navy-900: #071422;
+    --navy-800: #0B1F33;
+    --navy-700: #132E4A;
+    --charcoal-900: #111111;
+    --charcoal-800: #1F1F1F;
+    --charcoal-700: #333333;
+    --accent: #C89B3C;
+    --accent-hover: #B5872A;
+    --accent-light: #F5ECD7;
+    --border-light: #E4DFD5;
+    --border-default: #D5CFBF;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--charcoal-900);
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background-color: #C89B3C;
+    color: #FFFFFF;
+  }
+}
+
+@layer utilities {
+  .editorial-rule {
+    height: 1px;
+    background-color: #D5CFBF;
+  }
+  
+  .editorial-rule-light {
+    height: 1px;
+    background-color: #E4DFD5;
+  }
+
+  .editorial-rule-dark {
+    height: 1px;
+    background-color: #1E3347;
+  }
+
+  .editorial-rule-accent {
+    height: 2px;
+    background-color: #C89B3C;
+  }
+
+  .editorial-shadow {
+    box-shadow: 0 1px 3px rgba(11, 31, 51, 0.04), 0 4px 12px rgba(11, 31, 51, 0.03);
+  }
+
+  .editorial-shadow-hover {
+    box-shadow: 0 2px 8px rgba(11, 31, 51, 0.06), 0 12px 24px rgba(11, 31, 51, 0.06);
+  }
+}
+
+/* Custom subtle scrollbar */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F7F5F0;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #D5CFBF;
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #B8B09F;
+}
