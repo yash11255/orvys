@@ -394,3 +394,21 @@ h1 em,h2 em,.hero h1 em{font-style:normal;color:var(--gold2)}
 .form .invalid{border-color:#b23b2e!important;box-shadow:0 0 0 3px rgba(178,59,46,.12)!important}
 .form .err-text{display:block;color:#b23b2e;font-size:13px;margin-top:6px}
 .site-foot .news .invalid{border-color:#e07a6e!important}
+.post-img figcaption{font-size:12.5px;color:var(--mute);margin-top:10px}
+.post-img figcaption a{border-bottom:1px solid var(--line)}
+.legal h2{font-size:24px;margin:40px 0 12px}.legal h3{font-size:19px;margin:26px 0 8px}
+.legal p,.legal li{color:#2a3442}
+
+/* ---- loading screen ---- */
+#loader{position:fixed;inset:0;z-index:999;background:#fff;display:flex;align-items:center;justify-content:center;transition:opacity .5s ease,visibility .5s}
+#loader .ld-in{display:flex;flex-direction:column;align-items:center;gap:22px;animation:ldUp .6s ease both}
+#loader img{height:44px}
+#loader .ld-bar{width:160px;height:2px;background:var(--line);overflow:hidden;border-radius:2px}
+#loader .ld-bar i{display:block;height:100%;width:40%;background:var(--gold);animation:ldMove 1s ease-in-out infinite}
+@keyframes ldMove{0%{transform:translateX(-100%)}100%{transform:translateX(260%)}}
+@keyframes ldUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.ld-done #loader{opacity:0;visibility:hidden}
+.ld-skip #loader{display:none}
+@media (prefers-reduced-motion:reduce){#loader{display:none}.rv{opacity:1;transform:none;transition:none}.hero .bg{animation:none}}
+.site-foot .bottom a{color:#9ea9b7;border-bottom:1px solid rgba(255,255,255,.2)}
+.site-foot .bottom a:hover{color:#fff}

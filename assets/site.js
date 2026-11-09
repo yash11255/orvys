@@ -1,4 +1,10 @@
 (function () {
+  // Loading screen: hide on load, max 1.2s
+  var root = document.documentElement;
+  function hideLoader() { root.classList.add('ld-done'); }
+  if (document.readyState === 'complete') hideLoader(); else window.addEventListener('load', hideLoader);
+  setTimeout(hideLoader, 1200);
+
   // Header: transparent over heroes, solid after scroll
   var head = document.getElementById('head');
   var hasHero = !head.classList.contains('light');

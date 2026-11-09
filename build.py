@@ -18,6 +18,14 @@ SITE_URL = "https://www.orvys.in"   # change to your live domain
 ROOT = pathlib.Path(__file__).parent
 LAYOUT = (ROOT / "src" / "_layout.html").read_text(encoding="utf-8")
 TODAY = datetime.date.today().isoformat()
+CREDITS = json.loads((ROOT / "assets" / "img" / "blog" / "credits.json").read_text(encoding="utf-8"))
+
+def credit(image):
+    c = CREDITS.get(image.split("/")[-1])
+    if not c:
+        return ""
+    return (f'<figcaption>Photo: <a href="{c["page"]}" rel="nofollow noopener" target="_blank">{html.escape(c["title"])}</a> '
+            f'by {html.escape(c["artist"])}, {c["license"]}, via Wikimedia Commons</figcaption>')
 
 
 def front(raw):
@@ -41,6 +49,7 @@ def render(content, *, title, desc, path, nav, head="", ogtype="website", ogimag
            .replace("{{ogtype}}", ogtype)
            .replace("{{ogimage}}", ogimage)
            .replace("{{extra_head}}", extra)
+           .replace("{{robots}}", "noindex,follow" if path == "404.html" else "index,follow,max-image-preview:large")
            .replace("{{content}}", content))
     if nav:
         out = out.replace(f'data-nav="{nav}"', f'data-nav="{nav}" class="on"')
@@ -62,7 +71,10 @@ for page in sorted((ROOT / "src" / "pages").glob("*.html")):
     path = "" if slug == "index" else f"{slug}.html"
     write(f"{slug}.html", render(body, title=meta.get("title", "Orvys"), desc=meta.get("desc", ""),
                                   path=path, nav=slug, head=meta.get("head", "")))
-    urls.append((path, TODAY, "1.0" if slug == "index" else "0.8"))
+    if slug == "404":
+        continue
+    prio = "1.0" if slug in ("index", "bihar-csr") else "0.3" if slug in ("privacy-policy", "terms", "disclaimer") else "0.8"
+    urls.append((path, TODAY, prio))
 
 # ---------- blog posts ----------
 posts = []
@@ -109,11 +121,12 @@ for i, p in enumerate(posts):
     <div class="byline">Orvys Research Team · <time datetime="{p["date"]}">{fmt(p["date"])}</time> · {p["read"]} min read</div>
   </div>
 </header>
-<div class="wrap"><figure class="post-img"><img src="/assets/img/{p["image"]}" alt="{html.escape(p.get("alt", p["title"]))}"></figure></div>
+<div class="wrap"><figure class="post-img"><img src="/assets/img/{p["image"]}" alt="{html.escape(p.get("alt", p["title"]))}">{credit(p["image"])}</figure></div>
 <div class="wrap post-grid">
   <div class="prose">{p["body"]}</div>
   <aside class="post-aside">
     <div class="aside-card"><span class="k">Free report</span><h4>Bihar CSR Outlook Report 2026</h4><p>District-by-district CSR data and seven ready-to-fund programmes.</p><a class="btn btn-gold" href="/insights.html#download">Download</a></div>
+    <div class="aside-card light"><span class="k">Bihar CSR hub</span><h4>CSR in Bihar, in one place</h4><p>Data, priority sectors and how to fund CSR projects in Bihar.</p><a class="btn btn-navy" href="/bihar-csr.html">Explore Bihar CSR</a></div>
     <div class="aside-card light"><span class="k">Work with us</span><h4>Planning a CSR programme?</h4><p>Tell us your priorities and we will propose a programme.</p><a class="btn btn-navy" href="/partner.html#start">Start a partnership</a></div>
   </aside>
 </div>

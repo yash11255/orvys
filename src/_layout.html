@@ -10,7 +10,7 @@
 <meta property="og:description" content="{{desc}}">
 <meta property="og:type" content="{{ogtype}}">
 <meta property="og:url" content="{{site}}/{{path}}">
-<meta name="robots" content="index,follow,max-image-preview:large">
+<meta name="robots" content="{{robots}}">
 <meta property="og:image" content="{{site}}{{ogimage}}">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/assets/orvys-logo.webp">
@@ -24,12 +24,15 @@
 {{extra_head}}
 </head>
 <body>
+<div id="loader" aria-hidden="true"><div class="ld-in"><img src="/assets/orvys-logo.webp" alt=""><div class="ld-bar"><i></i></div></div></div>
+<script>try{if(sessionStorage.getItem("ov-seen")){document.documentElement.classList.add("ld-skip")}sessionStorage.setItem("ov-seen","1")}catch(e){}</script>
 <header class="site-head {{headClass}}" id="head">
   <div class="wrap bar">
     <a href="/index.html" class="logo" aria-label="Orvys home"><img src="/assets/orvys-logo.webp" alt="Orvys"></a>
     <nav id="nav" aria-label="Main">
       <ul>
         <li><a href="/about.html" data-nav="about">About</a></li>
+        <li><a href="/bihar-csr.html" data-nav="bihar-csr">Bihar CSR</a></li>
         <li><a href="/what-we-do.html" data-nav="what-we-do">What We Do</a></li>
         <li><a href="/partner.html" data-nav="partner">Partner With Us</a></li>
         <li><a href="/insights.html" data-nav="insights">Insights</a></li>
@@ -54,7 +57,7 @@
       </div>
       <div>
         <h5>Organisation</h5>
-        <ul><li><a href="/about.html">About Orvys</a></li><li><a href="/what-we-do.html">What We Do</a></li><li><a href="/insights.html">Insights &amp; Reports</a></li><li><a href="/blog/">Blog</a></li></ul>
+        <ul><li><a href="/about.html">About Orvys</a></li><li><a href="/bihar-csr.html">Bihar CSR</a></li><li><a href="/what-we-do.html">What We Do</a></li><li><a href="/insights.html">Insights &amp; Reports</a></li><li><a href="/blog/">Blog</a></li></ul>
       </div>
       <div>
         <h5>Work With Us</h5>
@@ -72,7 +75,7 @@
       </div>
     </div>
     <div class="bottom">
-      <span>© 2026 Orvys. All rights reserved.</span>
+      <span>© 2026 Orvys. All rights reserved. · <a href="/privacy-policy.html">Privacy Policy</a> · <a href="/terms.html">Terms of Use</a> · <a href="/disclaimer.html">Disclaimer</a></span>
       <span>Patna, Bihar · Working across India</span>
     </div>
     <div class="credits">Photography via Wikimedia Commons: Gandhi Ghat, Patna by AnkitAnand073 (CC BY-SA 4.0); Mahabodhi Temple and Nalanda Mahavihara by Sumitsurai (CC BY-SA 4.0); Golghar by Aryan Ghosh (CC BY-SA 3.0); Madhubani artist by Pallav.journo (CC BY-SA 4.0); Bihar flood relief by Kumarrakajee (CC BY-SA 3.0); School by DrAmitKSharma (CC BY-SA 4.0); Chhath by Heba Aisha (CC BY-SA 4.0).</div>

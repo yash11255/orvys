@@ -45,3 +45,22 @@ Upload the whole folder to any static host, such as Netlify, Vercel, GitHub Page
 ## Photo credits
 
 The photos are from Wikimedia Commons under CC BY-SA licences, and are credited in the site footer. Keep those credits, or replace the photos with your own.
+
+## Get every page indexed by Google
+
+The site already includes `sitemap.xml` (36 URLs), `robots.txt`, canonical tags, Open Graph tags and structured data (Organization, BlogPosting, BreadcrumbList, FAQPage).
+
+1. Deploy the site on your domain. If it is not `https://www.orvys.in`, change `SITE_URL` in `build.py`, run `python3 build.py`, and push.
+2. Open Google Search Console (search.google.com/search-console), add your domain, and verify it through DNS.
+3. Go to **Sitemaps**, enter `sitemap.xml` and click **Submit**.
+4. Use **URL Inspection → Request indexing** for the most important pages first: `/`, `/bihar-csr.html`, `/insights.html` and `/blog/`.
+5. Do the same in Bing Webmaster Tools; you can import the site straight from Search Console.
+
+## Ranking for "Bihar CSR"
+
+`/bihar-csr.html` is the main page targeting this search. It is linked from the main menu, the footer and every blog post. To rank, Google also needs signals from outside the site:
+
+- Set up a **Google Business Profile** for Orvys in Patna.
+- Get links to the Bihar CSR report from news sites, CSR portals, NGOs and LinkedIn posts.
+- Publish one or two new posts a month, and update the Bihar CSR page when new MCA data is released.
+- Ranking usually takes 2-6 months after indexing.
