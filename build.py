@@ -1,0 +1,156 @@
+#!/usr/bin/env python3
+"""Builds the Orvys site.
+
+- src/pages/*.html   -> /<page>.html        (wrapped in src/_layout.html)
+- src/blog/*.html    -> /blog/<slug>.html   (several posts per file, separated by <!--POST-->)
+- blog index         -> /blog/index.html
+- sitemap.xml, robots.txt
+
+Front matter at the top of each page/post:
+<!--
+key: value
+-->
+Run:  python3 build.py
+"""
+import pathlib, re, json, html, datetime
+
+SITE_URL = "https://www.orvys.in"   # change to your live domain
+ROOT = pathlib.Path(__file__).parent
+LAYOUT = (ROOT / "src" / "_layout.html").read_text(encoding="utf-8")
+TODAY = datetime.date.today().isoformat()
+
+
+def front(raw):
+    m = re.match(r"\s*<!--(.*?)-->", raw, re.S)
+    meta = {}
+    if m:
+        for line in m.group(1).strip().splitlines():
+            k, _, v = line.partition(":")
+            if k.strip():
+                meta[k.strip()] = v.strip()
+        raw = raw[m.end():]
+    return meta, raw.strip()
+
+
+def render(content, *, title, desc, path, nav, head="", ogtype="website", ogimage="/assets/img/ganga.jpg", extra=""):
+    out = (LAYOUT.replace("{{title}}", html.escape(title, quote=False))
+           .replace("{{desc}}", html.escape(desc))
+           .replace("{{headClass}}", head)
+           .replace("{{site}}", SITE_URL)
+           .replace("{{path}}", path)
+           .replace("{{ogtype}}", ogtype)
+           .replace("{{ogimage}}", ogimage)
+           .replace("{{extra_head}}", extra)
+           .replace("{{content}}", content))
+    if nav:
+        out = out.replace(f'data-nav="{nav}"', f'data-nav="{nav}" class="on"')
+    return out
+
+
+def write(rel, text):
+    p = ROOT / rel
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text(text, encoding="utf-8")
+
+
+urls = []
+
+# ---------- pages ----------
+for page in sorted((ROOT / "src" / "pages").glob("*.html")):
+    meta, body = front(page.read_text(encoding="utf-8"))
+    slug = page.stem
+    path = "" if slug == "index" else f"{slug}.html"
+    write(f"{slug}.html", render(body, title=meta.get("title", "Orvys"), desc=meta.get("desc", ""),
+                                  path=path, nav=slug, head=meta.get("head", "")))
+    urls.append((path, TODAY, "1.0" if slug == "index" else "0.8"))
+
+# ---------- blog posts ----------
+posts = []
+for f in sorted((ROOT / "src" / "blog").glob("*.html")):
+    for chunk in f.read_text(encoding="utf-8").split("<!--POST-->"):
+        if chunk.strip():
+            meta, body = front(chunk)
+            meta["body"] = body
+            posts.append(meta)
+posts.sort(key=lambda p: p["date"], reverse=True)
+
+def fmt(d):
+    return datetime.date.fromisoformat(d).strftime("%-d %B %Y")
+
+def card(p):
+    return (f'<a class="post-card" href="/blog/{p["slug"]}.html"><div class="img"><img src="/assets/img/{p["image"]}" alt="" loading="lazy"></div>'
+            f'<span class="k">{p["category"]}</span><h3>{p["title"]}</h3><p>{p["desc"]}</p>'
+            f'<span class="meta">{fmt(p["date"])} · {p["read"]} min read</span></a>')
+
+for i, p in enumerate(posts):
+    related = [q for q in posts if q is not p and q["category"] == p["category"]][:3]
+    if len(related) < 3:
+        related += [q for q in posts if q is not p and q not in related][: 3 - len(related)]
+    url = f"{SITE_URL}/blog/{p['slug']}.html"
+    ld = [{
+        "@context": "https://schema.org", "@type": "BlogPosting", "headline": p["title"], "description": p["desc"],
+        "image": f"{SITE_URL}/assets/img/{p['image']}", "datePublished": p["date"], "dateModified": p["date"],
+        "author": {"@type": "Organization", "name": "Orvys Research Team", "url": SITE_URL},
+        "publisher": {"@type": "Organization", "name": "Orvys", "logo": {"@type": "ImageObject", "url": f"{SITE_URL}/assets/orvys-logo.webp"}},
+        "mainEntityOfPage": url, "articleSection": p["category"], "keywords": p.get("keywords", ""), "inLanguage": "en-IN"},
+        {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
+            {"@type": "ListItem", "position": 1, "name": "Home", "item": f"{SITE_URL}/"},
+            {"@type": "ListItem", "position": 2, "name": "Blog", "item": f"{SITE_URL}/blog/"},
+            {"@type": "ListItem", "position": 3, "name": p["title"], "item": url}]}]
+    extra = "".join(f'<script type="application/ld+json">{json.dumps(x, ensure_ascii=False)}</script>' for x in ld)
+    extra += f'\n<meta property="article:published_time" content="{p["date"]}">\n<meta property="article:section" content="{p["category"]}">'
+    body = f'''<article>
+<header class="post-head">
+  <div class="wrap narrow">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> / <a href="/blog/">Blog</a> / <span>{p["category"]}</span></nav>
+    <span class="chip">{p["category"]}</span>
+    <h1>{p["title"]}</h1>
+    <p class="lede">{p["desc"]}</p>
+    <div class="byline">Orvys Research Team · <time datetime="{p["date"]}">{fmt(p["date"])}</time> · {p["read"]} min read</div>
+  </div>
+</header>
+<div class="wrap"><figure class="post-img"><img src="/assets/img/{p["image"]}" alt="{html.escape(p.get("alt", p["title"]))}"></figure></div>
+<div class="wrap post-grid">
+  <div class="prose">{p["body"]}</div>
+  <aside class="post-aside">
+    <div class="aside-card"><span class="k">Free report</span><h4>Bihar CSR Outlook Report 2026</h4><p>District-by-district CSR data and seven ready-to-fund programmes.</p><a class="btn btn-gold" href="/insights.html#download">Download</a></div>
+    <div class="aside-card light"><span class="k">Work with us</span><h4>Planning a CSR programme?</h4><p>Tell us your priorities and we will propose a programme.</p><a class="btn btn-navy" href="/partner.html#start">Start a partnership</a></div>
+  </aside>
+</div>
+</article>
+<section class="sand"><div class="wrap"><span class="eyebrow">Keep reading</span><h2 style="margin:16px 0 0">Related articles</h2><div class="post-grid-list">{"".join(card(q) for q in related)}</div></div></section>'''
+    write(f"blog/{p['slug']}.html", render(body, title=f'{p["title"]} | Orvys', desc=p["desc"],
+          path=f"blog/{p['slug']}.html", nav="blog", head="light", ogtype="article",
+          ogimage=f"/assets/img/{p['image']}", extra=extra))
+    urls.append((f"blog/{p['slug']}.html", p["date"], "0.7"))
+
+# ---------- blog index ----------
+cats = sorted({p["category"] for p in posts})
+chips = '<button class="chip on" data-cat="all">All</button>' + "".join(f'<button class="chip" data-cat="{c}">{c}</button>' for c in cats)
+cards = "".join(card(p).replace('<a class="post-card"', f'<a class="post-card" data-cat="{p["category"]}"', 1) for p in posts)
+blog = f'''<section class="post-head" style="padding-bottom:40px">
+  <div class="wrap">
+    <span class="chip">Orvys Blog</span>
+    <h1 style="margin-top:20px">CSR in India: guides, data and ideas</h1>
+    <p class="lede" style="max-width:720px">Practical guides to CSR law and programme design, and data on where India's CSR goes, with a special focus on Bihar.</p>
+    <div class="filters">{chips}</div>
+  </div>
+</section>
+<section style="padding-top:20px"><div class="wrap"><div class="post-grid-list">{cards}</div></div></section>
+<script>document.querySelectorAll('.filters .chip').forEach(function(b){{b.addEventListener('click',function(){{document.querySelectorAll('.filters .chip').forEach(function(x){{x.classList.remove('on')}});b.classList.add('on');var c=b.dataset.cat;document.querySelectorAll('.post-card[data-cat]').forEach(function(a){{a.style.display=(c==='all'||a.dataset.cat===c)?'':'none'}})}})}});</script>'''
+ld = {"@context": "https://schema.org", "@type": "Blog", "name": "Orvys Blog", "url": f"{SITE_URL}/blog/",
+      "blogPost": [{"@type": "BlogPosting", "headline": p["title"], "url": f"{SITE_URL}/blog/{p['slug']}.html", "datePublished": p["date"]} for p in posts]}
+write("blog/index.html", render(blog, title="Blog | CSR in India: Guides, Data and Ideas | Orvys",
+      desc="Guides to CSR law, Schedule VII, unspent CSR funds and impact assessment, plus data on CSR in Bihar and India.",
+      path="blog/", nav="blog", head="light", extra=f'<script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>'))
+urls.append(("blog/", posts[0]["date"] if posts else TODAY, "0.9"))
+
+# ---------- sitemap + robots ----------
+sm = ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
+for path, lastmod, prio in urls:
+    sm.append(f"  <url><loc>{SITE_URL}/{path}</loc><lastmod>{lastmod}</lastmod><priority>{prio}</priority></url>")
+sm.append("</urlset>")
+write("sitemap.xml", "\n".join(sm) + "\n")
+write("robots.txt", f"User-agent: *\nAllow: /\nDisallow: /src/\nDisallow: /apps-script/\n\nSitemap: {SITE_URL}/sitemap.xml\n")
+
+print(f"built {len(urls) - len(posts) - 1} pages, {len(posts)} posts, blog index, sitemap ({len(urls)} URLs), robots.txt")
