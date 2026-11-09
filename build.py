@@ -12,9 +12,12 @@ key: value
 -->
 Run:  python3 build.py
 """
-import pathlib, re, json, html, datetime
+import pathlib, re, json, html, datetime, os
 
-SITE_URL = "https://www.orvys.in"   # change to your live domain
+# Live address. On GitHub Pages without a custom domain the site lives under /orvys.
+# With your own domain: SITE_URL="https://www.orvys.in" BASE_PATH="" python3 build.py
+SITE_URL = os.environ.get("SITE_URL", "https://yash11255.github.io/orvys").rstrip("/")
+BASE_PATH = os.environ.get("BASE_PATH", "/orvys").rstrip("/")
 ROOT = pathlib.Path(__file__).parent
 LAYOUT = (ROOT / "src" / "_layout.html").read_text(encoding="utf-8")
 TODAY = datetime.date.today().isoformat()
@@ -56,7 +59,16 @@ def render(content, *, title, desc, path, nav, head="", ogtype="website", ogimag
     return out
 
 
+def rebase(text):
+    if not BASE_PATH:
+        return text
+    text = re.sub(r'((?:href|src|data-download|action)=")/(?!/)', r'\1' + BASE_PATH + '/', text)
+    return re.sub(r"(url\(')/(?!/)", r"\1" + BASE_PATH + "/", text)
+
+
 def write(rel, text):
+    if rel.endswith(".html"):
+        text = rebase(text)
     p = ROOT / rel
     p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text(text, encoding="utf-8")
